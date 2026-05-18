@@ -23,4 +23,14 @@ export type PublicEvent = {
   venueName: string;
   startsAt: string;
   minPriceCents: number;
+  ticketTypes: PublicTicketType[];
+};
+
+export type PublicTicketType = {
+  id: string;
+  name: string;
+  priceCents: number;
+  quantityTotal: number;
+  quantitySold: number;
+  quantityAvailable: number;
 };

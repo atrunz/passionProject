@@ -46,8 +46,38 @@ export default async function EventPage({ params }: EventPageProps) {
             <span>From {formatCurrency(event.minPriceCents)}</span>
           </div>
         </div>
-        <button className="mt-6 w-full rounded-md bg-zinc-950 px-4 py-3 text-sm font-bold text-white">
-          Tickets coming next
+        <div className="mt-6 border-t border-zinc-200 pt-5">
+          <h2 className="text-lg font-black tracking-tight text-zinc-950">Tickets</h2>
+          <div className="mt-4 space-y-3">
+            {event.ticketTypes.map((ticketType) => {
+              const isSoldOut = ticketType.quantityAvailable <= 0;
+
+              return (
+                <div
+                  key={ticketType.id}
+                  className="rounded-md border border-zinc-200 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-black text-zinc-950">{ticketType.name}</h3>
+                      <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        {isSoldOut ? "Sold out" : `${ticketType.quantityAvailable} available`}
+                      </p>
+                    </div>
+                    <span className="text-sm font-black text-zinc-950">
+                      {formatCurrency(ticketType.priceCents)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <button
+          disabled
+          className="mt-5 w-full cursor-not-allowed rounded-md bg-zinc-300 px-4 py-3 text-sm font-bold text-zinc-600"
+        >
+          Checkout coming next
         </button>
       </aside>
     </main>

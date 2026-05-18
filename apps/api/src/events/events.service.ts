@@ -37,7 +37,15 @@ export class EventsService {
       state: event.venue.state,
       venueName: event.venue.name,
       startsAt: event.startsAt.toISOString(),
-      minPriceCents: event.ticketTypes[0]?.priceCents ?? 0
+      minPriceCents: event.ticketTypes[0]?.priceCents ?? 0,
+      ticketTypes: event.ticketTypes.map((ticketType) => ({
+        id: ticketType.id,
+        name: ticketType.name,
+        priceCents: ticketType.priceCents,
+        quantityTotal: ticketType.quantityTotal,
+        quantitySold: ticketType.quantitySold,
+        quantityAvailable: Math.max(ticketType.quantityTotal - ticketType.quantitySold, 0)
+      }))
     }));
   }
 
@@ -71,7 +79,15 @@ export class EventsService {
       state: event.venue.state,
       venueName: event.venue.name,
       startsAt: event.startsAt.toISOString(),
-      minPriceCents: event.ticketTypes[0]?.priceCents ?? 0
+      minPriceCents: event.ticketTypes[0]?.priceCents ?? 0,
+      ticketTypes: event.ticketTypes.map((ticketType) => ({
+        id: ticketType.id,
+        name: ticketType.name,
+        priceCents: ticketType.priceCents,
+        quantityTotal: ticketType.quantityTotal,
+        quantitySold: ticketType.quantitySold,
+        quantityAvailable: Math.max(ticketType.quantityTotal - ticketType.quantitySold, 0)
+      }))
     };
   }
 }

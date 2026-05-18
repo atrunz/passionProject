@@ -12,7 +12,25 @@ const fallbackEvents: PublicEvent[] = [
     state: "NJ",
     venueName: "The Harbor Room",
     startsAt: "2026-06-12T23:00:00.000Z",
-    minPriceCents: 1200
+    minPriceCents: 1200,
+    ticketTypes: [
+      {
+        id: "tt_needle_ga",
+        name: "General Admission",
+        priceCents: 1200,
+        quantityTotal: 160,
+        quantitySold: 0,
+        quantityAvailable: 160
+      },
+      {
+        id: "tt_needle_door",
+        name: "Door Hold",
+        priceCents: 1500,
+        quantityTotal: 40,
+        quantitySold: 0,
+        quantityAvailable: 40
+      }
+    ]
   },
   {
     id: "evt-basement-signal",
@@ -25,7 +43,17 @@ const fallbackEvents: PublicEvent[] = [
     state: "PA",
     venueName: "Warehouse 39",
     startsAt: "2026-06-20T00:00:00.000Z",
-    minPriceCents: 1000
+    minPriceCents: 1000,
+    ticketTypes: [
+      {
+        id: "tt_basement_ga",
+        name: "All Ages GA",
+        priceCents: 1000,
+        quantityTotal: 140,
+        quantitySold: 0,
+        quantityAvailable: 140
+      }
+    ]
   },
   {
     id: "evt-late-set-laughs",
@@ -38,7 +66,17 @@ const fallbackEvents: PublicEvent[] = [
     state: "NY",
     venueName: "Backbar Social",
     startsAt: "2026-06-27T01:30:00.000Z",
-    minPriceCents: 1500
+    minPriceCents: 1500,
+    ticketTypes: [
+      {
+        id: "tt_late_set_ga",
+        name: "General Admission",
+        priceCents: 1500,
+        quantityTotal: 90,
+        quantitySold: 0,
+        quantityAvailable: 90
+      }
+    ]
   }
 ];
 
