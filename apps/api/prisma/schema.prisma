@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  FAN
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELED
+}
+
+enum EventGenre {
+  ROCK
+  PUNK
+  INDIE
+  HIP_HOP
+  ELECTRONIC
+  FOLK
+  JAZZ
+  COMEDY
+  OTHER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+}
+
+enum TicketStatus {
+  ACTIVE
+  CHECKED_IN
+  VOID
+}
+
+enum CheckInResult {
+  SUCCESS
+  ALREADY_CHECKED_IN
+  INVALID
+  VOID
+}
+
+model User {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  email       String   @unique
+  name        String?
+  role        UserRole @default(FAN)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizer Organizer?
+  orders    Order[]
+  tickets   Ticket[]   @relation("TicketOwner")
+  checkIns  CheckIn[]  @relation("CheckedInBy")
+}
+
+model Organizer {
+  id          String   @id @default(cuid())
+  ownerUserId String   @unique
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner  User    @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  venues Venue[]
+  events Event[]
+}
+
+model Venue {
+  id          String   @id @default(cuid())
+  organizerId String
+  name        String
+  address     String
+  city        String
+  state       String
+  capacity    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  events    Event[]
+
+  @@index([organizerId])
+  @@index([city, state])
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  organizerId String
+  venueId     String
+  title       String
+  slug        String      @unique
+  description String
+  genre       EventGenre
+  startsAt    DateTime
+  endsAt      DateTime?
+  status      EventStatus @default(DRAFT)
+  posterUrl   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  organizer   Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  ticketTypes TicketType[]
+  orders      Order[]
+  tickets     Ticket[]
+  checkIns    CheckIn[]
+
+  @@index([organizerId])
+  @@index([venueId])
+  @@index([status, startsAt])
+  @@index([genre])
+}
+
+model TicketType {
+  id             String   @id @default(cuid())
+  eventId        String
+  name           String
+  priceCents     Int
+  quantityTotal  Int
+  quantitySold   Int      @default(0)
+  salesStartAt   DateTime?
+  salesEndAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  event      Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  tickets    Ticket[]
+
+  @@index([eventId])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  userId           String
+  eventId          String
+  status           OrderStatus @default(PENDING)
+  totalCents       Int
+  paymentProvider  String?
+  paymentReference String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  event   Event       @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  items   OrderItem[]
+  tickets Ticket[]
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  ticketTypeId String
+  quantity     Int
+  unitPriceCents Int
+
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([ticketTypeId])
+}
+
+model Ticket {
+  id                String       @id @default(cuid())
+  orderId           String
+  ticketTypeId      String
+  eventId           String
+  ownerUserId       String
+  code              String       @unique
+  status            TicketStatus @default(ACTIVE)
+  checkedInAt       DateTime?
+  checkedInByUserId String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  event      Event      @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  owner      User       @relation("TicketOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  checkIns   CheckIn[]
+
+  @@index([ownerUserId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model CheckIn {
+  id                String        @id @default(cuid())
+  ticketId          String
+  eventId           String
+  checkedInByUserId String
+  result            CheckInResult
+  createdAt         DateTime      @default(now())
+
+  ticket      Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  event       Event  @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  checkedInBy User  @relation("CheckedInBy", fields: [checkedInByUserId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId])
+  @@index([eventId])
+  @@index([checkedInByUserId])
+}

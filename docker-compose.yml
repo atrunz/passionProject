@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: localshow-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: localshow
+      POSTGRES_PASSWORD: localshow
+      POSTGRES_DB: localshow
+    volumes:
+      - localshow_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localshow -d localshow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  localshow_postgres:
