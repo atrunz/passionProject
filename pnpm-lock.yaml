@@ -29,6 +29,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@clerk/backend':
+        specifier: ^2.33.3
+        version: 2.33.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@localshow/shared':
         specifier: workspace:*
         version: link:../../packages/shared

@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { ArrowLeft, MapPin, Users } from "lucide-react";
 import { getOrganizerAccount, listOrganizerVenues } from "@/features/dashboard/api";
+import { getServerAuthToken } from "@/lib/server-auth-token";
 import { VenueForm } from "./venue-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function VenuesPage() {
-  const [organizer, venues] = await Promise.all([getOrganizerAccount(), listOrganizerVenues()]);
+  const authToken = await getServerAuthToken();
+  const [organizer, venues] = await Promise.all([
+    getOrganizerAccount(authToken),
+    listOrganizerVenues(authToken)
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
+import { useApiAuthToken } from "@/components/auth-token-context";
 import { updateOrganizerAccount, type OrganizerAccount } from "@/features/dashboard/api";
 
 type AccountFormProps = {
@@ -11,6 +12,7 @@ type AccountFormProps = {
 
 export function AccountForm({ organizer }: AccountFormProps) {
   const router = useRouter();
+  const { getToken } = useApiAuthToken();
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -22,11 +24,12 @@ export function AccountForm({ organizer }: AccountFormProps) {
     const form = new FormData(event.currentTarget);
 
     try {
+      const authToken = await getToken();
       await updateOrganizerAccount({
         name: String(form.get("name") ?? ""),
         slug: String(form.get("slug") ?? ""),
         description: String(form.get("description") ?? "")
-      });
+      }, authToken);
 
       router.refresh();
     } catch (caught) {

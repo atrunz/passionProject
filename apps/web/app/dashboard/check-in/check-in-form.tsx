@@ -2,10 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { CheckCircle2, CircleAlert, Search } from "lucide-react";
+import { useApiAuthToken } from "@/components/auth-token-context";
 import { checkInTicket, type CheckInResult } from "@/features/checkins/api";
 import { formatEventDate } from "@/lib/format";
 
 export function CheckInForm() {
+  const { getToken } = useApiAuthToken();
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -20,7 +22,8 @@ export function CheckInForm() {
     const ticketCode = String(form.get("ticketCode") ?? "");
 
     try {
-      const response = await checkInTicket(ticketCode);
+      const authToken = await getToken();
+      const response = await checkInTicket(ticketCode, authToken);
       setResult(response);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to check in ticket");

@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { listOrganizerVenues } from "@/features/dashboard/api";
+import { getServerAuthToken } from "@/lib/server-auth-token";
 import { NewEventForm } from "./new-event-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewEventPage() {
-  const venues = await listOrganizerVenues();
+  const authToken = await getServerAuthToken();
+  const venues = await listOrganizerVenues(authToken);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">

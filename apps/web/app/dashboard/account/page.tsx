@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { ArrowLeft, Building2, UserRound } from "lucide-react";
 import { getOrganizerAccount } from "@/features/dashboard/api";
+import { getServerAuthToken } from "@/lib/server-auth-token";
 import { AccountForm } from "./account-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function AccountPage() {
-  const organizer = await getOrganizerAccount();
+  const authToken = await getServerAuthToken();
+  const organizer = await getOrganizerAccount(authToken);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">

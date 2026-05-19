@@ -1,5 +1,9 @@
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
+type ApiOptions = RequestInit & {
+  authToken?: string | null;
+};
+
 export type TicketWalletItem = {
   id: string;
   code: string;
@@ -22,11 +26,12 @@ export type TicketWalletItem = {
   };
 };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: ApiOptions): Promise<T> {
   const response = await fetch(`${apiUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(init?.authToken ? { Authorization: `Bearer ${init.authToken}` } : {}),
       ...init?.headers
     },
     cache: "no-store"
@@ -40,8 +45,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json();
 }
 
-export function createMockOrder(ticketTypeId: string, quantity = 1) {
+export function createMockOrder(ticketTypeId: string, quantity = 1, authToken?: string | null) {
   return request("/orders/mock", {
+    authToken,
     method: "POST",
     body: JSON.stringify({
       ticketTypeId,
@@ -50,6 +56,6 @@ export function createMockOrder(ticketTypeId: string, quantity = 1) {
   });
 }
 
-export function listMyTickets() {
-  return request<TicketWalletItem[]>("/me/tickets");
+export function listMyTickets(authToken?: string | null) {
+  return request<TicketWalletItem[]>("/me/tickets", { authToken });
 }

@@ -3,10 +3,12 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useApiAuthToken } from "@/components/auth-token-context";
 import { createOrganizerVenue } from "@/features/dashboard/api";
 
 export function VenueForm() {
   const router = useRouter();
+  const { getToken } = useApiAuthToken();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,13 +20,14 @@ export function VenueForm() {
     const form = new FormData(event.currentTarget);
 
     try {
+      const authToken = await getToken();
       await createOrganizerVenue({
         name: String(form.get("name") ?? ""),
         address: String(form.get("address") ?? ""),
         city: String(form.get("city") ?? ""),
         state: String(form.get("state") ?? "").toUpperCase(),
         capacity: Number(form.get("capacity") ?? 0)
-      });
+      }, authToken);
 
       event.currentTarget.reset();
       router.refresh();

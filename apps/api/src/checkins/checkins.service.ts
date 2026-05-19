@@ -1,15 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { CheckInResult, TicketStatus } from "@prisma/client";
+import { CheckInResult, TicketStatus, User } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-
-const DEV_CHECK_IN_EMAIL = "organizer@localshow.test";
 
 @Injectable()
 export class CheckinsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkInTicket(ticketCode: string) {
-    const checkedInBy = await this.getDevOrganizerUser();
+  async checkInTicket(checkedInBy: User, ticketCode: string) {
     const normalizedCode = ticketCode.trim().toUpperCase();
 
     const ticket = await this.prisma.ticket.findUnique({
@@ -90,14 +87,6 @@ export class CheckinsService {
       message: "Ticket checked in",
       ticket: checkedInTicket
     };
-  }
-
-  private async getDevOrganizerUser() {
-    return this.prisma.user.findUniqueOrThrow({
-      where: {
-        email: DEV_CHECK_IN_EMAIL
-      }
-    });
   }
 
   private async writeCheckInAudit(

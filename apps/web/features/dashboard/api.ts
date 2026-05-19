@@ -2,6 +2,10 @@ import type { EventGenre } from "@localshow/shared";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
+type ApiOptions = RequestInit & {
+  authToken?: string | null;
+};
+
 export type Venue = {
   id: string;
   name: string;
@@ -77,11 +81,12 @@ export type CreateEventInput = {
   }>;
 };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: ApiOptions): Promise<T> {
   const response = await fetch(`${apiUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(init?.authToken ? { Authorization: `Bearer ${init.authToken}` } : {}),
       ...init?.headers
     },
     cache: "no-store"
@@ -95,38 +100,41 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json();
 }
 
-export function listOrganizerVenues() {
-  return request<Venue[]>("/organizer/venues");
+export function listOrganizerVenues(authToken?: string | null) {
+  return request<Venue[]>("/organizer/venues", { authToken });
 }
 
-export function getOrganizerAccount() {
-  return request<OrganizerAccount>("/organizer/me");
+export function getOrganizerAccount(authToken?: string | null) {
+  return request<OrganizerAccount>("/organizer/me", { authToken });
 }
 
-export function updateOrganizerAccount(input: UpdateOrganizerInput) {
+export function updateOrganizerAccount(input: UpdateOrganizerInput, authToken?: string | null) {
   return request<OrganizerAccount>("/organizer/me", {
+    authToken,
     method: "PATCH",
     body: JSON.stringify(input)
   });
 }
 
-export function getOrganizerSummary() {
-  return request<OrganizerSummary>("/organizer/summary");
+export function getOrganizerSummary(authToken?: string | null) {
+  return request<OrganizerSummary>("/organizer/summary", { authToken });
 }
 
-export function createOrganizerVenue(input: CreateVenueInput) {
+export function createOrganizerVenue(input: CreateVenueInput, authToken?: string | null) {
   return request<Venue>("/organizer/venues", {
+    authToken,
     method: "POST",
     body: JSON.stringify(input)
   });
 }
 
-export function listOrganizerEvents() {
-  return request<DashboardEvent[]>("/organizer/events");
+export function listOrganizerEvents(authToken?: string | null) {
+  return request<DashboardEvent[]>("/organizer/events", { authToken });
 }
 
-export function createOrganizerEvent(input: CreateEventInput) {
+export function createOrganizerEvent(input: CreateEventInput, authToken?: string | null) {
   return request<DashboardEvent>("/organizer/events", {
+    authToken,
     method: "POST",
     body: JSON.stringify(input)
   });

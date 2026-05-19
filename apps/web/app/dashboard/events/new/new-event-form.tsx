@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { EVENT_GENRES, type EventGenre } from "@localshow/shared";
+import { useApiAuthToken } from "@/components/auth-token-context";
 import {
   createOrganizerEvent,
   createOrganizerVenue,
@@ -23,6 +24,7 @@ type TicketTypeForm = {
 
 export function NewEventForm({ initialVenues }: NewEventFormProps) {
   const router = useRouter();
+  const { getToken } = useApiAuthToken();
   const [venues, setVenues] = useState(initialVenues);
   const [venueMode, setVenueMode] = useState<"existing" | "new">(
     initialVenues.length > 0 ? "existing" : "new"
@@ -52,16 +54,20 @@ export function NewEventForm({ initialVenues }: NewEventFormProps) {
     const form = new FormData(event.currentTarget);
 
     try {
+      const authToken = await getToken();
       let venueId = String(form.get("venueId") ?? defaultVenueId);
 
       if (venueMode === "new") {
-        const venue = await createOrganizerVenue({
-          name: String(form.get("venueName") ?? ""),
-          address: String(form.get("venueAddress") ?? ""),
-          city: String(form.get("venueCity") ?? ""),
-          state: String(form.get("venueState") ?? ""),
-          capacity: Number(form.get("venueCapacity") ?? 0)
-        });
+        const venue = await createOrganizerVenue(
+          {
+            name: String(form.get("venueName") ?? ""),
+            address: String(form.get("venueAddress") ?? ""),
+            city: String(form.get("venueCity") ?? ""),
+            state: String(form.get("venueState") ?? ""),
+            capacity: Number(form.get("venueCapacity") ?? 0)
+          },
+          authToken
+        );
 
         venueId = venue.id;
         setVenues((current) => [...current, venue]);
@@ -82,7 +88,7 @@ export function NewEventForm({ initialVenues }: NewEventFormProps) {
         }))
       };
 
-      const created = await createOrganizerEvent(payload);
+      const created = await createOrganizerEvent(payload, authToken);
       router.push(`/events/${created.slug}`);
       router.refresh();
     } catch (caught) {

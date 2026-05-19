@@ -2,10 +2,14 @@ import Link from "next/link";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { listMyTickets } from "@/features/tickets/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
+import { getServerAuthToken } from "@/lib/server-auth-token";
 import { TicketQrCode } from "./ticket-qr-code";
 
+export const dynamic = "force-dynamic";
+
 export default async function TicketsPage() {
-  const tickets = await listMyTickets();
+  const authToken = await getServerAuthToken();
+  const tickets = await listMyTickets(authToken);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">

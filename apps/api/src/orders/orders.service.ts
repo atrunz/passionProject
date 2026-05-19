@@ -1,32 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { TicketStatus } from "@prisma/client";
+import { TicketStatus, User } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
-
-const DEV_FAN_EMAIL = "fan@localshow.test";
 
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDevFan() {
-    return this.prisma.user.upsert({
-      where: {
-        email: DEV_FAN_EMAIL
-      },
-      update: {},
-      create: {
-        clerkUserId: "seed_clerk_fan",
-        email: DEV_FAN_EMAIL,
-        name: "Demo Fan",
-        role: "FAN"
-      }
-    });
-  }
-
-  async createMockOrder(dto: CreateOrderDto) {
-    const fan = await this.getDevFan();
-
+  async createMockOrder(fan: User, dto: CreateOrderDto) {
     return this.prisma.$transaction(async (tx) => {
       const ticketType = await tx.ticketType.findUnique({
         where: {
@@ -108,9 +89,7 @@ export class OrdersService {
     });
   }
 
-  async listMyTickets() {
-    const fan = await this.getDevFan();
-
+  async listMyTickets(fan: User) {
     return this.prisma.ticket.findMany({
       where: {
         ownerUserId: fan.id

@@ -6,14 +6,20 @@ import {
   ListMusic,
   MapPin,
   Settings,
-  Ticket,
-  Users
+  Ticket
 } from "lucide-react";
 import { getOrganizerAccount, getOrganizerSummary } from "@/features/dashboard/api";
 import { formatCurrency } from "@/lib/format";
+import { getServerAuthToken } from "@/lib/server-auth-token";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [organizer, summary] = await Promise.all([getOrganizerAccount(), getOrganizerSummary()]);
+  const authToken = await getServerAuthToken();
+  const [organizer, summary] = await Promise.all([
+    getOrganizerAccount(authToken),
+    getOrganizerSummary(authToken)
+  ]);
 
   const stats = [
     {
@@ -131,14 +137,10 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <Users className="size-5 text-teal-700" />
-          <h2 className="text-xl font-black tracking-tight">Account workflow note</h2>
-        </div>
+        <h2 className="text-xl font-black tracking-tight">Organizer next step</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">
-          This dashboard currently uses a development organizer. When Clerk is connected, this same
-          area becomes the post-signup organizer workspace where venue owners create their account,
-          add venues, publish events, and run door check-in.
+          Finish the organizer profile, add at least one venue, then publish a public event listing
+          with ticket inventory. That path now mirrors the production account workflow.
         </p>
       </section>
     </main>

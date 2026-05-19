@@ -89,9 +89,7 @@ export async function getPublicEvents(): Promise<PublicEvent[]> {
 
   try {
     const response = await fetch(`${apiUrl}/events`, {
-      next: {
-        revalidate: 60
-      }
+      cache: "no-store"
     });
 
     if (!response.ok) {
@@ -113,9 +111,7 @@ export async function getPublicEvent(slug: string): Promise<PublicEvent | null> 
 
   try {
     const response = await fetch(`${apiUrl}/events/${slug}`, {
-      next: {
-        revalidate: 60
-      }
+      cache: "no-store"
     });
 
     if (response.status === 404) {

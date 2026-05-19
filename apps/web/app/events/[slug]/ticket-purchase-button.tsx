@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useApiAuthToken } from "@/components/auth-token-context";
 import { createMockOrder } from "@/features/tickets/api";
 
 type TicketPurchaseButtonProps = {
@@ -11,6 +12,7 @@ type TicketPurchaseButtonProps = {
 
 export function TicketPurchaseButton({ ticketTypeId, disabled }: TicketPurchaseButtonProps) {
   const router = useRouter();
+  const { getToken } = useApiAuthToken();
   const [isBuying, setIsBuying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +21,8 @@ export function TicketPurchaseButton({ ticketTypeId, disabled }: TicketPurchaseB
     setIsBuying(true);
 
     try {
-      await createMockOrder(ticketTypeId, 1);
+      const authToken = await getToken();
+      await createMockOrder(ticketTypeId, 1, authToken);
       router.push("/tickets");
       router.refresh();
     } catch (caught) {

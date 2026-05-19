@@ -4,6 +4,8 @@ import { getPublicEvent } from "@/features/events/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
 import { TicketPurchaseButton } from "./ticket-purchase-button";
 
+export const dynamic = "force-dynamic";
+
 type EventPageProps = {
   params: Promise<{
     slug: string;

@@ -1,32 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { EventStatus } from "@prisma/client";
+import { EventStatus, User } from "@prisma/client";
 import { uniqueSlug } from "../common/slug";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { CreateVenueDto } from "./dto/create-venue.dto";
 import { UpdateOrganizerDto } from "./dto/update-organizer.dto";
 
-const DEV_ORGANIZER_SLUG = "localshow-demo";
-const DEV_ORGANIZER_EMAIL = "organizer@localshow.test";
-
 @Injectable()
 export class OrganizerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDevOrganizer() {
-    const owner = await this.prisma.user.upsert({
-      where: {
-        email: DEV_ORGANIZER_EMAIL
-      },
-      update: {},
-      create: {
-        clerkUserId: "seed_clerk_organizer",
-        email: DEV_ORGANIZER_EMAIL,
-        name: "Demo Organizer",
-        role: "ORGANIZER"
-      }
-    });
-
+  async getOrganizerForUser(owner: User) {
     const organizer = await this.prisma.organizer.findUnique({
       where: {
         ownerUserId: owner.id
@@ -40,15 +24,15 @@ export class OrganizerService {
     return this.prisma.organizer.create({
       data: {
         ownerUserId: owner.id,
-        name: "LocalShow Demo Collective",
-        slug: DEV_ORGANIZER_SLUG,
-        description: "Development organizer used until Clerk auth is connected."
+        name: owner.name ? `${owner.name}'s Organizer Account` : "New LocalShow Organizer",
+        slug: await this.createOrganizerSlug(owner),
+        description: null
       }
     });
   }
 
-  async updateOrganizer(dto: UpdateOrganizerDto) {
-    const organizer = await this.getDevOrganizer();
+  async updateOrganizer(owner: User, dto: UpdateOrganizerDto) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     const slugOwner = await this.prisma.organizer.findUnique({
       where: {
@@ -72,8 +56,8 @@ export class OrganizerService {
     });
   }
 
-  async listVenues() {
-    const organizer = await this.getDevOrganizer();
+  async listVenues(owner: User) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     return this.prisma.venue.findMany({
       where: {
@@ -85,8 +69,8 @@ export class OrganizerService {
     });
   }
 
-  async createVenue(dto: CreateVenueDto) {
-    const organizer = await this.getDevOrganizer();
+  async createVenue(owner: User, dto: CreateVenueDto) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     return this.prisma.venue.create({
       data: {
@@ -100,8 +84,8 @@ export class OrganizerService {
     });
   }
 
-  async listEvents() {
-    const organizer = await this.getDevOrganizer();
+  async listEvents(owner: User) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     return this.prisma.event.findMany({
       where: {
@@ -121,8 +105,8 @@ export class OrganizerService {
     });
   }
 
-  async getSummary() {
-    const organizer = await this.getDevOrganizer();
+  async getSummary(owner: User) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     const [venueCount, eventCount, publishedEventCount, orders, ticketCount, checkedInTicketCount] =
       await Promise.all([
@@ -184,8 +168,8 @@ export class OrganizerService {
     };
   }
 
-  async createEvent(dto: CreateEventDto) {
-    const organizer = await this.getDevOrganizer();
+  async createEvent(owner: User, dto: CreateEventDto) {
+    const organizer = await this.getOrganizerForUser(owner);
 
     const venue = await this.prisma.venue.findFirst({
       where: {
@@ -231,5 +215,18 @@ export class OrganizerService {
     });
 
     return event;
+  }
+
+  private async createOrganizerSlug(owner: User) {
+    const base = owner.name || owner.email.split("@")[0] || "organizer";
+    let slug = uniqueSlug(base);
+    let suffix = 1;
+
+    while (await this.prisma.organizer.findUnique({ where: { slug } })) {
+      slug = `${uniqueSlug(base)}-${suffix}`;
+      suffix += 1;
+    }
+
+    return slug;
   }
 }

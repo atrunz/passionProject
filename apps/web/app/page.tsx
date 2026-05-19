@@ -1,6 +1,8 @@
 import { EventCard } from "@/components/event-card";
 import { getPublicEvents } from "@/features/events/api";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const events = await getPublicEvents();
 

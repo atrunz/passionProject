@@ -23,11 +23,12 @@ export type CheckInResult = {
   };
 };
 
-export async function checkInTicket(ticketCode: string) {
+export async function checkInTicket(ticketCode: string, authToken?: string | null) {
   const response = await fetch(`${apiUrl}/organizer/check-ins`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
     },
     body: JSON.stringify({ ticketCode })
   });

@@ -2,9 +2,13 @@ import Link from "next/link";
 import { Calendar, MapPin, Plus, Ticket } from "lucide-react";
 import { listOrganizerEvents } from "@/features/dashboard/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
+import { getServerAuthToken } from "@/lib/server-auth-token";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardEventsPage() {
-  const events = await listOrganizerEvents();
+  const authToken = await getServerAuthToken();
+  const events = await listOrganizerEvents(authToken);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
