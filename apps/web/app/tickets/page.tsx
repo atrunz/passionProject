@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { listMyTickets } from "@/features/tickets/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
+import { TicketQrCode } from "./ticket-qr-code";
 
 export default async function TicketsPage() {
   const tickets = await listMyTickets();
@@ -54,6 +55,7 @@ export default async function TicketsPage() {
                 </div>
               </div>
               <div className="mt-5 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-4 text-center">
+                <TicketQrCode code={ticket.code} />
                 <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">Ticket code</p>
                 <p className="mt-2 font-mono text-lg font-black tracking-wide text-zinc-950">
                   {ticket.code}
