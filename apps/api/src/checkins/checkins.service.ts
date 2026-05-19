@@ -1,0 +1,118 @@
+import { Injectable } from "@nestjs/common";
+import { CheckInResult, TicketStatus } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+
+const DEV_CHECK_IN_EMAIL = "organizer@localshow.test";
+
+@Injectable()
+export class CheckinsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async checkInTicket(ticketCode: string) {
+    const checkedInBy = await this.getDevOrganizerUser();
+    const normalizedCode = ticketCode.trim().toUpperCase();
+
+    const ticket = await this.prisma.ticket.findUnique({
+      where: {
+        code: normalizedCode
+      },
+      include: {
+        event: {
+          include: {
+            venue: true
+          }
+        },
+        ticketType: true
+      }
+    });
+
+    if (!ticket) {
+      return {
+        result: CheckInResult.INVALID,
+        message: "Ticket code not found"
+      };
+    }
+
+    if (ticket.status === TicketStatus.CHECKED_IN) {
+      await this.writeCheckInAudit(ticket.id, ticket.eventId, checkedInBy.id, CheckInResult.ALREADY_CHECKED_IN);
+
+      return {
+        result: CheckInResult.ALREADY_CHECKED_IN,
+        message: "Ticket has already been checked in",
+        ticket
+      };
+    }
+
+    if (ticket.status === TicketStatus.VOID) {
+      await this.writeCheckInAudit(ticket.id, ticket.eventId, checkedInBy.id, CheckInResult.VOID);
+
+      return {
+        result: CheckInResult.VOID,
+        message: "Ticket is void",
+        ticket
+      };
+    }
+
+    const checkedInTicket = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.ticket.update({
+        where: {
+          id: ticket.id
+        },
+        data: {
+          status: TicketStatus.CHECKED_IN,
+          checkedInAt: new Date(),
+          checkedInByUserId: checkedInBy.id
+        },
+        include: {
+          event: {
+            include: {
+              venue: true
+            }
+          },
+          ticketType: true
+        }
+      });
+
+      await tx.checkIn.create({
+        data: {
+          ticketId: ticket.id,
+          eventId: ticket.eventId,
+          checkedInByUserId: checkedInBy.id,
+          result: CheckInResult.SUCCESS
+        }
+      });
+
+      return updated;
+    });
+
+    return {
+      result: CheckInResult.SUCCESS,
+      message: "Ticket checked in",
+      ticket: checkedInTicket
+    };
+  }
+
+  private async getDevOrganizerUser() {
+    return this.prisma.user.findUniqueOrThrow({
+      where: {
+        email: DEV_CHECK_IN_EMAIL
+      }
+    });
+  }
+
+  private async writeCheckInAudit(
+    ticketId: string,
+    eventId: string,
+    checkedInByUserId: string,
+    result: CheckInResult
+  ) {
+    await this.prisma.checkIn.create({
+      data: {
+        ticketId,
+        eventId,
+        checkedInByUserId,
+        result
+      }
+    });
+  }
+}

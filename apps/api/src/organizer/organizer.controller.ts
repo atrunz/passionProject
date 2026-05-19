@@ -27,6 +27,11 @@ export class OrganizerController {
     return this.organizerService.listEvents();
   }
 
+  @Get("summary")
+  getSummary() {
+    return this.organizerService.getSummary();
+  }
+
   @Post("events")
   createEvent(@Body() dto: CreateEventDto) {
     return this.organizerService.createEvent(dto);

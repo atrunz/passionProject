@@ -13,6 +13,7 @@ export default async function HomePage() {
         </Link>
         <nav className="flex items-center gap-3 text-sm font-medium text-zinc-700">
           <Link href="/events">Events</Link>
+          <Link href="/tickets">Tickets</Link>
           <Link
             href="/dashboard"
             className="rounded-md bg-zinc-900 px-3 py-2 text-white transition hover:bg-zinc-700"

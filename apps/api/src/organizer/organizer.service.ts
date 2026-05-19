@@ -82,6 +82,69 @@ export class OrganizerService {
     });
   }
 
+  async getSummary() {
+    const organizer = await this.getDevOrganizer();
+
+    const [venueCount, eventCount, publishedEventCount, orders, ticketCount, checkedInTicketCount] =
+      await Promise.all([
+        this.prisma.venue.count({
+          where: {
+            organizerId: organizer.id
+          }
+        }),
+        this.prisma.event.count({
+          where: {
+            organizerId: organizer.id
+          }
+        }),
+        this.prisma.event.count({
+          where: {
+            organizerId: organizer.id,
+            status: "PUBLISHED"
+          }
+        }),
+        this.prisma.order.findMany({
+          where: {
+            event: {
+              organizerId: organizer.id
+            },
+            status: "PAID"
+          },
+          select: {
+            totalCents: true
+          }
+        }),
+        this.prisma.ticket.count({
+          where: {
+            event: {
+              organizerId: organizer.id
+            }
+          }
+        }),
+        this.prisma.ticket.count({
+          where: {
+            event: {
+              organizerId: organizer.id
+            },
+            status: "CHECKED_IN"
+          }
+        })
+      ]);
+
+    const grossRevenueCents = orders.reduce((total, order) => total + order.totalCents, 0);
+
+    return {
+      organizerId: organizer.id,
+      venueCount,
+      eventCount,
+      publishedEventCount,
+      paidOrderCount: orders.length,
+      ticketCount,
+      checkedInTicketCount,
+      grossRevenueCents
+    };
+  }
+
   async createEvent(dto: CreateEventDto) {
     const organizer = await this.getDevOrganizer();
 

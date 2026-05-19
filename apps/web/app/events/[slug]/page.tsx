@@ -2,6 +2,7 @@ import { Calendar, MapPin, Ticket } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getPublicEvent } from "@/features/events/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
+import { TicketPurchaseButton } from "./ticket-purchase-button";
 
 type EventPageProps = {
   params: Promise<{
@@ -68,17 +69,12 @@ export default async function EventPage({ params }: EventPageProps) {
                       {formatCurrency(ticketType.priceCents)}
                     </span>
                   </div>
+                  <TicketPurchaseButton ticketTypeId={ticketType.id} disabled={isSoldOut} />
                 </div>
               );
             })}
           </div>
         </div>
-        <button
-          disabled
-          className="mt-5 w-full cursor-not-allowed rounded-md bg-zinc-300 px-4 py-3 text-sm font-bold text-zinc-600"
-        >
-          Checkout coming next
-        </button>
       </aside>
     </main>
   );

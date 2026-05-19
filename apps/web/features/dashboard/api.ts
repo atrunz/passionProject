@@ -11,6 +11,24 @@ export type Venue = {
   capacity: number;
 };
 
+export type OrganizerAccount = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+};
+
+export type OrganizerSummary = {
+  organizerId: string;
+  venueCount: number;
+  eventCount: number;
+  publishedEventCount: number;
+  paidOrderCount: number;
+  ticketCount: number;
+  checkedInTicketCount: number;
+  grossRevenueCents: number;
+};
+
 export type DashboardEvent = {
   id: string;
   title: string;
@@ -73,6 +91,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function listOrganizerVenues() {
   return request<Venue[]>("/organizer/venues");
+}
+
+export function getOrganizerAccount() {
+  return request<OrganizerAccount>("/organizer/me");
+}
+
+export function getOrganizerSummary() {
+  return request<OrganizerSummary>("/organizer/summary");
 }
 
 export function createOrganizerVenue(input: CreateVenueInput) {
