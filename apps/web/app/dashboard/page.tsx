@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { CalendarPlus, DollarSign, ListChecks, ListMusic, MapPin, Ticket, Users } from "lucide-react";
+import {
+  CalendarPlus,
+  DollarSign,
+  ListChecks,
+  ListMusic,
+  MapPin,
+  Settings,
+  Ticket,
+  Users
+} from "lucide-react";
 import { getOrganizerAccount, getOrganizerSummary } from "@/features/dashboard/api";
 import { formatCurrency } from "@/lib/format";
 
@@ -43,13 +52,22 @@ export default async function DashboardPage() {
             {organizer.name} · @{organizer.slug}
           </p>
         </div>
-        <Link
-          href="/dashboard/events/new"
-          className="inline-flex items-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
-        >
-          <CalendarPlus className="size-4" />
-          Create event
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/account"
+            className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-bold text-zinc-800 transition hover:bg-zinc-50"
+          >
+            <Settings className="size-4" />
+            Account
+          </Link>
+          <Link
+            href="/dashboard/events/new"
+            className="inline-flex items-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
+          >
+            <CalendarPlus className="size-4" />
+            Create event
+          </Link>
+        </div>
       </div>
 
       <section className="mt-8 grid gap-4 md:grid-cols-4">

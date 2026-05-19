@@ -29,6 +29,12 @@ export type OrganizerSummary = {
   grossRevenueCents: number;
 };
 
+export type UpdateOrganizerInput = {
+  name: string;
+  slug: string;
+  description?: string;
+};
+
 export type DashboardEvent = {
   id: string;
   title: string;
@@ -95,6 +101,13 @@ export function listOrganizerVenues() {
 
 export function getOrganizerAccount() {
   return request<OrganizerAccount>("/organizer/me");
+}
+
+export function updateOrganizerAccount(input: UpdateOrganizerInput) {
+  return request<OrganizerAccount>("/organizer/me", {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
 }
 
 export function getOrganizerSummary() {

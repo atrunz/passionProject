@@ -4,31 +4,70 @@ import { uniqueSlug } from "../common/slug";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { CreateVenueDto } from "./dto/create-venue.dto";
+import { UpdateOrganizerDto } from "./dto/update-organizer.dto";
 
 const DEV_ORGANIZER_SLUG = "localshow-demo";
+const DEV_ORGANIZER_EMAIL = "organizer@localshow.test";
 
 @Injectable()
 export class OrganizerService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDevOrganizer() {
-    return this.prisma.organizer.upsert({
+    const owner = await this.prisma.user.upsert({
       where: {
-        slug: DEV_ORGANIZER_SLUG
+        email: DEV_ORGANIZER_EMAIL
       },
       update: {},
       create: {
+        clerkUserId: "seed_clerk_organizer",
+        email: DEV_ORGANIZER_EMAIL,
+        name: "Demo Organizer",
+        role: "ORGANIZER"
+      }
+    });
+
+    const organizer = await this.prisma.organizer.findUnique({
+      where: {
+        ownerUserId: owner.id
+      }
+    });
+
+    if (organizer) {
+      return organizer;
+    }
+
+    return this.prisma.organizer.create({
+      data: {
+        ownerUserId: owner.id,
         name: "LocalShow Demo Collective",
         slug: DEV_ORGANIZER_SLUG,
-        description: "Development organizer used until Clerk auth is connected.",
-        owner: {
-          create: {
-            clerkUserId: "seed_clerk_organizer",
-            email: "organizer@localshow.test",
-            name: "Demo Organizer",
-            role: "ORGANIZER"
-          }
-        }
+        description: "Development organizer used until Clerk auth is connected."
+      }
+    });
+  }
+
+  async updateOrganizer(dto: UpdateOrganizerDto) {
+    const organizer = await this.getDevOrganizer();
+
+    const slugOwner = await this.prisma.organizer.findUnique({
+      where: {
+        slug: dto.slug
+      }
+    });
+
+    if (slugOwner && slugOwner.id !== organizer.id) {
+      throw new BadRequestException("Organizer slug is already taken");
+    }
+
+    return this.prisma.organizer.update({
+      where: {
+        id: organizer.id
+      },
+      data: {
+        name: dto.name,
+        slug: dto.slug,
+        description: dto.description?.trim() || null
       }
     });
   }

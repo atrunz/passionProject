@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post } from "@nestjs/common";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { CreateVenueDto } from "./dto/create-venue.dto";
+import { UpdateOrganizerDto } from "./dto/update-organizer.dto";
 import { OrganizerService } from "./organizer.service";
 
 @Controller("organizer")
@@ -10,6 +11,11 @@ export class OrganizerController {
   @Get("me")
   getOrganizer() {
     return this.organizerService.getDevOrganizer();
+  }
+
+  @Patch("me")
+  updateOrganizer(@Body() dto: UpdateOrganizerDto) {
+    return this.organizerService.updateOrganizer(dto);
   }
 
   @Get("venues")
