@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
+import { AuthService } from "../auth/auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateMeDto } from "./dto/update-me.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService
+  ) {}
 
   getProfile(user: User) {
     return {
@@ -28,6 +32,10 @@ export class UsersService {
         role: dto.role ?? user.role
       }
     });
+
+    if (dto.role && dto.role !== user.role) {
+      await this.authService.syncClerkRoleMetadata(updated);
+    }
 
     return this.getProfile(updated);
   }

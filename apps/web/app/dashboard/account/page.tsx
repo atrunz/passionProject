@@ -33,10 +33,10 @@ export default async function AccountPage() {
         <aside className="space-y-4">
           <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
             <Building2 className="size-6 text-teal-700" />
-            <h2 className="mt-4 text-xl font-black tracking-tight">Venue-ready profile</h2>
+            <h2 className="mt-4 text-xl font-black tracking-tight">Organizer-ready profile</h2>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              This is the profile future customers will create after signup before adding venues and
-              publishing events.
+              This is the profile future customers will create after signup before adding locations
+              and publishing events.
             </p>
           </section>
           <section className="rounded-lg border border-dashed border-zinc-300 bg-white p-5">

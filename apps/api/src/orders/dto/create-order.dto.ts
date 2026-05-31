@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsInt, IsNotEmpty, IsString, Max, Min } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class CreateOrderDto {
   @IsString()
@@ -11,4 +11,8 @@ export class CreateOrderDto {
   @Min(1)
   @Max(8)
   quantity!: number;
+
+  @IsOptional()
+  @IsString()
+  performerAttributionId?: string;
 }

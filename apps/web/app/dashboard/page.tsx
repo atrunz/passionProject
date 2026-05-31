@@ -1,10 +1,15 @@
 import Link from "next/link";
 import {
   CalendarPlus,
+  CheckCircle2,
+  Circle,
   DollarSign,
   ListChecks,
   ListMusic,
+  Mail,
   MapPin,
+  ReceiptText,
+  Rocket,
   Settings,
   Ticket
 } from "lucide-react";
@@ -29,9 +34,9 @@ export default async function DashboardPage() {
       icon: ListMusic
     },
     {
-      label: "Venues",
+      label: "Locations",
       value: summary.venueCount,
-      detail: "managed locations",
+      detail: "saved places",
       icon: MapPin
     },
     {
@@ -47,6 +52,34 @@ export default async function DashboardPage() {
       icon: DollarSign
     }
   ];
+  const checklist = [
+    {
+      label: "Finish organizer profile",
+      detail: "Set a public name, slug, and short description.",
+      href: "/dashboard/account",
+      complete: Boolean(organizer.name && organizer.slug && organizer.description)
+    },
+    {
+      label: "Add your first location",
+      detail: "Save at least one bar, venue, DIY space, or show address.",
+      href: "/dashboard/venues",
+      complete: summary.venueCount > 0
+    },
+    {
+      label: "Publish your first event",
+      detail: "Create a public listing with ticket inventory.",
+      href: "/dashboard/events/new",
+      complete: summary.publishedEventCount > 0
+    },
+    {
+      label: "Confirm door workflow",
+      detail: "Use ticket wallet QR codes with the check-in screen.",
+      href: "/dashboard/check-in",
+      complete: summary.ticketCount > 0 || summary.checkedInTicketCount > 0
+    }
+  ];
+  const completedSteps = checklist.filter((item) => item.complete).length;
+  const setupPercent = Math.round((completedSteps / checklist.length) * 100);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
@@ -55,7 +88,13 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-4xl font-black tracking-tight text-zinc-950">Dashboard</h1>
           <p className="mt-2 text-sm text-zinc-600">
-            {organizer.name} · @{organizer.slug}
+            {organizer.name} ·{" "}
+            <Link
+              href={`/organizers/${organizer.slug}`}
+              className="font-bold text-teal-700 transition hover:text-teal-900"
+            >
+              @{organizer.slug}
+            </Link>
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -93,6 +132,53 @@ export default async function DashboardPage() {
         })}
       </section>
 
+      <section className="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
+              Setup
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
+              Organizer launch checklist
+            </h2>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-black tracking-tight text-zinc-950">{setupPercent}%</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+              {completedSteps} of {checklist.length} done
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-zinc-100">
+          <div className="h-full rounded-full bg-teal-600" style={{ width: `${setupPercent}%` }} />
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {checklist.map((item) => {
+            const Icon = item.complete ? CheckCircle2 : Circle;
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="rounded-md border border-zinc-200 p-4 transition hover:border-zinc-300 hover:bg-zinc-50"
+              >
+                <div className="flex items-start gap-3">
+                  <Icon
+                    className={`mt-0.5 size-5 ${item.complete ? "text-teal-700" : "text-zinc-400"}`}
+                  />
+                  <div>
+                    <p className="font-black tracking-tight text-zinc-950">{item.label}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-600">{item.detail}</p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
       <div className="mt-8 grid gap-4 md:grid-cols-4">
         <Link
           href="/dashboard/events/new"
@@ -101,7 +187,7 @@ export default async function DashboardPage() {
           <CalendarPlus className="size-6 text-teal-700" />
           <h2 className="mt-4 text-xl font-black tracking-tight">Create event</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Add a show, choose a venue, and define ticket inventory.
+            Add a show, choose a location, and define ticket inventory.
           </p>
         </Link>
         <Link
@@ -125,23 +211,61 @@ export default async function DashboardPage() {
           </p>
         </Link>
         <Link
-          href="/dashboard/venues"
+          href="/dashboard/orders"
           className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
-          <MapPin className="size-6 text-teal-700" />
-          <h2 className="mt-4 text-xl font-black tracking-tight">Venues</h2>
+          <ReceiptText className="size-6 text-teal-700" />
+          <h2 className="mt-4 text-xl font-black tracking-tight">Orders</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Add and manage venue locations for future event listings.
+            Review purchases, customer emails, payment references, and issued tickets.
           </p>
         </Link>
       </div>
 
       <section className="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-black tracking-tight">Organizer next step</h2>
+        <h2 className="text-xl font-black tracking-tight">Recommended next move</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">
-          Finish the organizer profile, add at least one venue, then publish a public event listing
-          with ticket inventory. That path now mirrors the production account workflow.
+          Work the checklist from top to bottom. It mirrors the real organizer onboarding flow:
+          profile, location, first event, and door operations.
         </p>
+      </section>
+
+      {!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+        <section className="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-black tracking-tight">Dev email outbox</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+                Inspect queued confirmation and transfer emails while provider delivery is still mocked.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/email-outbox"
+              className="inline-flex items-center gap-2 rounded-md border border-zinc-300 px-4 py-3 text-sm font-bold text-zinc-800 transition hover:bg-zinc-50"
+            >
+              <Mail className="size-4" />
+              Open outbox
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-black tracking-tight">Launch readiness</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+              Check database, storage, auth, payment, and AI configuration before deploying.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/launch"
+            className="inline-flex items-center gap-2 rounded-md border border-zinc-300 px-4 py-3 text-sm font-bold text-zinc-800 transition hover:bg-zinc-50"
+          >
+            <Rocket className="size-4" />
+            View readiness
+          </Link>
+        </div>
       </section>
     </main>
   );

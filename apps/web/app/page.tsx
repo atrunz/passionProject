@@ -18,8 +18,8 @@ export default async function HomePage() {
           </h1>
         </div>
         <p className="max-w-md text-lg leading-8 text-zinc-700">
-          LocalShow helps small venues, DIY organizers, and bands publish events, sell tickets, and
-          check fans in without heavyweight ticketing software.
+          LocalShow helps local organizers, DIY spaces, venues, bars, and bands publish events,
+          sell tickets, and check fans in without heavyweight ticketing software.
         </p>
       </section>
 
@@ -33,11 +33,20 @@ export default async function HomePage() {
             View all
           </a>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
+        {events.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-8">
+            <h3 className="text-xl font-black tracking-tight text-zinc-950">No shows listed yet</h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">
+              Published organizer events will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

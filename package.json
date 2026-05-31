@@ -11,10 +11,12 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
+    "smoke:local": "node scripts/smoke-local.mjs",
     "format": "prettier --write .",
     "db:generate": "pnpm --filter @localshow/api db:generate",
     "db:migrate": "pnpm --filter @localshow/api db:migrate",
-    "db:seed": "pnpm --filter @localshow/api db:seed"
+    "db:seed": "pnpm --filter @localshow/api db:seed",
+    "db:seed:reset": "pnpm --filter @localshow/api db:seed:reset"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

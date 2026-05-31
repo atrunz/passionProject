@@ -12,7 +12,8 @@ export class CheckinsController {
 
   @Post()
   async checkInTicket(@Req() request: RequestLike, @Body() dto: CheckInTicketDto) {
-    const user = await this.authService.resolveUser(request, "ORGANIZER");
-    return this.checkinsService.checkInTicket(user, dto.ticketCode);
+    const user = await this.authService.resolveUser(request, "FAN");
+    this.authService.ensureRole(user, ["ORGANIZER", "ADMIN"]);
+    return this.checkinsService.checkInTicket(user, dto.ticketCode, dto.eventId);
   }
 }

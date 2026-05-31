@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:reset": "tsx prisma/seed.ts --reset"
   },
   "dependencies": {
     "@clerk/backend": "^2.33.3",

@@ -32,7 +32,7 @@ export function VenueForm() {
       event.currentTarget.reset();
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to create venue");
+      setError(caught instanceof Error ? caught.message : "Unable to create location");
     } finally {
       setIsSubmitting(false);
     }
@@ -40,14 +40,14 @@ export function VenueForm() {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-      <h2 className="text-xl font-black tracking-tight">Add venue</h2>
+      <h2 className="text-xl font-black tracking-tight">Add location</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
-        Venues become selectable when creating organizer events.
+        Locations can be venues, bars, DIY spaces, house shows, or other show addresses.
       </p>
 
       <div className="mt-5 grid gap-4">
         <label className="grid gap-2 text-sm font-semibold text-zinc-800">
-          Venue name
+          Location name
           <input
             name="name"
             required
@@ -64,24 +64,24 @@ export function VenueForm() {
             className="rounded-md border border-zinc-300 px-3 py-2 font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           />
         </label>
-        <div className="grid gap-4 sm:grid-cols-[1fr_90px]">
-          <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_72px]">
+          <label className="grid min-w-0 gap-2 text-sm font-semibold text-zinc-800">
             City
             <input
               name="city"
               required
               placeholder="Asbury Park"
-              className="rounded-md border border-zinc-300 px-3 py-2 font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 font-normal outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
             />
           </label>
-          <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+          <label className="grid min-w-0 gap-2 text-sm font-semibold text-zinc-800">
             State
             <input
               name="state"
               required
               maxLength={2}
               placeholder="NJ"
-              className="rounded-md border border-zinc-300 px-3 py-2 font-normal uppercase outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 font-normal uppercase outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
             />
           </label>
         </div>
@@ -110,7 +110,7 @@ export function VenueForm() {
         className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-black text-white transition hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-70"
       >
         <Plus className="size-4" />
-        {isSubmitting ? "Adding..." : "Add venue"}
+        {isSubmitting ? "Adding..." : "Add location"}
       </button>
     </form>
   );

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Calendar, MapPin, Plus, Ticket } from "lucide-react";
+import { Calendar, FilePenLine, ListChecks, MapPin, Plus, Ticket } from "lucide-react";
 import { listOrganizerEvents } from "@/features/dashboard/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
 import { getServerAuthToken } from "@/lib/server-auth-token";
+import { EventStatusActions } from "./event-status-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -51,12 +52,28 @@ export default async function DashboardEventsPage() {
                     {event.description}
                   </p>
                 </div>
-                <Link
-                  href={`/events/${event.slug}`}
-                  className="text-sm font-bold text-teal-700 hover:text-teal-900"
-                >
-                  View public page
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/dashboard/events/${event.id}/edit`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-zinc-950"
+                  >
+                    <FilePenLine className="size-4" />
+                    Edit
+                  </Link>
+                  <Link
+                    href={`/dashboard/events/${event.id}/attendees`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-zinc-950"
+                  >
+                    <ListChecks className="size-4" />
+                    Attendees
+                  </Link>
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className="text-sm font-bold text-teal-700 hover:text-teal-900"
+                  >
+                    View public page
+                  </Link>
+                </div>
               </div>
               <div className="mt-5 grid gap-3 text-sm text-zinc-600 sm:grid-cols-3">
                 <div className="flex items-center gap-2">
@@ -76,6 +93,9 @@ export default async function DashboardEventsPage() {
                     {formatCurrency(minPrice)}
                   </span>
                 </div>
+              </div>
+              <div className="mt-5 flex justify-end border-t border-zinc-100 pt-4">
+                <EventStatusActions event={event} />
               </div>
             </article>
           );

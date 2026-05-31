@@ -51,6 +51,18 @@ enum CheckInResult {
   VOID
 }
 
+enum EmailNotificationType {
+  ORDER_CONFIRMATION
+  TICKET_TRANSFER_SENT
+  TICKET_TRANSFER_RECEIVED
+}
+
+enum EmailNotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
 model User {
   id          String   @id @default(cuid())
   clerkUserId String   @unique
@@ -115,6 +127,7 @@ model Event {
 
   organizer   Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  performers  EventPerformer[]
   ticketTypes TicketType[]
   orders      Order[]
   tickets     Ticket[]
@@ -124,6 +137,23 @@ model Event {
   @@index([venueId])
   @@index([status, startsAt])
   @@index([genre])
+}
+
+model EventPerformer {
+  id        String   @id @default(cuid())
+  eventId   String
+  name      String
+  slug      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  attributedOrders  Order[]  @relation("OrderPerformerAttribution")
+  attributedTickets Ticket[] @relation("TicketPerformerAttribution")
+
+  @@unique([eventId, slug])
+  @@index([eventId])
 }
 
 model TicketType {
@@ -149,6 +179,7 @@ model Order {
   id               String      @id @default(cuid())
   userId           String
   eventId          String
+  performerAttributionId String?
   status           OrderStatus @default(PENDING)
   totalCents       Int
   paymentProvider  String?
@@ -158,11 +189,13 @@ model Order {
 
   user    User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   event   Event       @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  performerAttribution EventPerformer? @relation("OrderPerformerAttribution", fields: [performerAttributionId], references: [id], onDelete: SetNull)
   items   OrderItem[]
   tickets Ticket[]
 
   @@index([userId])
   @@index([eventId])
+  @@index([performerAttributionId])
   @@index([status])
 }
 
@@ -186,6 +219,7 @@ model Ticket {
   ticketTypeId      String
   eventId           String
   ownerUserId       String
+  performerAttributionId String?
   code              String       @unique
   status            TicketStatus @default(ACTIVE)
   checkedInAt       DateTime?
@@ -197,10 +231,12 @@ model Ticket {
   ticketType TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
   event      Event      @relation(fields: [eventId], references: [id], onDelete: Restrict)
   owner      User       @relation("TicketOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  performerAttribution EventPerformer? @relation("TicketPerformerAttribution", fields: [performerAttributionId], references: [id], onDelete: SetNull)
   checkIns   CheckIn[]
 
   @@index([ownerUserId])
   @@index([eventId])
+  @@index([performerAttributionId])
   @@index([status])
 }
 
@@ -219,4 +255,20 @@ model CheckIn {
   @@index([ticketId])
   @@index([eventId])
   @@index([checkedInByUserId])
+}
+
+model EmailNotification {
+  id        String                  @id @default(cuid())
+  type      EmailNotificationType
+  status    EmailNotificationStatus @default(QUEUED)
+  toEmail   String
+  subject   String
+  bodyText  String
+  metadata  Json?
+  createdAt DateTime                @default(now())
+  sentAt    DateTime?
+
+  @@index([status, createdAt])
+  @@index([toEmail])
+  @@index([type])
 }

@@ -43,7 +43,7 @@ export function AccountForm({ organizer }: AccountFormProps) {
     <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
       <h2 className="text-xl font-black tracking-tight">Organizer profile</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
-        This profile represents the venue, promoter, or collective that publishes events.
+        This profile represents the organizer, band, promoter, venue, or collective that publishes events.
       </p>
 
       <div className="mt-5 grid gap-4">

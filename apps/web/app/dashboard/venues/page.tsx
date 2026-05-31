@@ -28,7 +28,7 @@ export default async function VenuesPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
             Organizer account
           </p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950">Venues</h1>
+          <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950">Locations</h1>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">Current account</p>
@@ -41,8 +41,8 @@ export default async function VenuesPage() {
         <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-black tracking-tight">Managed venues</h2>
-              <p className="mt-1 text-sm text-zinc-600">{venues.length} venue{venues.length === 1 ? "" : "s"}</p>
+              <h2 className="text-xl font-black tracking-tight">Saved locations</h2>
+              <p className="mt-1 text-sm text-zinc-600">{venues.length} location{venues.length === 1 ? "" : "s"}</p>
             </div>
             <Link href="/dashboard/events/new" className="rounded-md bg-zinc-950 px-3 py-2 text-sm font-bold text-white transition hover:bg-zinc-700">
               Create event

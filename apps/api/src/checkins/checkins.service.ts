@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { CheckInResult, TicketStatus, User } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -6,8 +6,9 @@ import { PrismaService } from "../prisma/prisma.service";
 export class CheckinsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkInTicket(checkedInBy: User, ticketCode: string) {
+  async checkInTicket(checkedInBy: User, ticketCode: string, eventId: string) {
     const normalizedCode = ticketCode.trim().toUpperCase();
+    const selectedEvent = await this.findCheckInEvent(checkedInBy, eventId);
 
     const ticket = await this.prisma.ticket.findUnique({
       where: {
@@ -27,6 +28,14 @@ export class CheckinsService {
       return {
         result: CheckInResult.INVALID,
         message: "Ticket code not found"
+      };
+    }
+
+    if (ticket.eventId !== selectedEvent.id) {
+      return {
+        result: CheckInResult.INVALID,
+        message: `Ticket is for ${ticket.event.title}, not ${selectedEvent.title}`,
+        ticket
       };
     }
 
@@ -103,5 +112,35 @@ export class CheckinsService {
         result
       }
     });
+  }
+
+  private async findCheckInEvent(checkedInBy: User, eventId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: {
+        id: eventId,
+        status: "PUBLISHED",
+        ...(checkedInBy.role === "ADMIN"
+          ? {}
+          : {
+              organizer: {
+                ownerUserId: checkedInBy.id
+              }
+            })
+      },
+      select: {
+        id: true,
+        title: true
+      }
+    });
+
+    if (!event) {
+      if (checkedInBy.role === "ADMIN") {
+        throw new NotFoundException("Check-in event not found");
+      }
+
+      throw new ForbiddenException("You can only check in tickets for your own events");
+    }
+
+    return event;
   }
 }

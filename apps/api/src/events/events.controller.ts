@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, Query } from "@nestjs/common";
 import { EventsService } from "./events.service";
 
 @Controller("events")
@@ -6,8 +6,13 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  listEvents() {
-    return this.eventsService.listPublicEvents();
+  listEvents(
+    @Query("q") query?: string,
+    @Query("city") city?: string,
+    @Query("genre") genre?: string,
+    @Query("when") when?: string
+  ) {
+    return this.eventsService.listPublicEvents({ query, city, genre, when });
   }
 
   @Get(":slug")

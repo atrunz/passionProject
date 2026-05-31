@@ -31,6 +31,20 @@ export class CreateTicketTypeDto {
   @Min(1)
   @Max(100000)
   quantityTotal!: number;
+
+  @IsOptional()
+  @IsISO8601()
+  salesStartAt?: string;
+
+  @IsOptional()
+  @IsISO8601()
+  salesEndAt?: string;
+}
+
+export class CreateEventPerformerDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
 }
 
 export class CreateEventDto {
@@ -66,4 +80,11 @@ export class CreateEventDto {
   @ValidateNested({ each: true })
   @Type(() => CreateTicketTypeDto)
   ticketTypes!: CreateTicketTypeDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => CreateEventPerformerDto)
+  performers?: CreateEventPerformerDto[];
 }

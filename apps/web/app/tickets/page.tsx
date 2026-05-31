@@ -65,6 +65,12 @@ export default async function TicketsPage() {
                   {ticket.code}
                 </p>
               </div>
+              <Link
+                href={`/tickets/${ticket.id}`}
+                className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-zinc-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+              >
+                Open ticket
+              </Link>
             </article>
           ))}
         </div>

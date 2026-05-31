@@ -1,6 +1,7 @@
 import { PrismaClient, EventGenre, EventStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const shouldResetDemoData = process.argv.includes("--reset");
 
 type VenueSeed = {
   name: string;
@@ -11,6 +12,10 @@ type VenueSeed = {
 };
 
 async function main() {
+  if (shouldResetDemoData) {
+    await resetDemoData();
+  }
+
   const organizer = await prisma.organizer.upsert({
     where: { slug: "localshow-demo" },
     update: {},
@@ -87,7 +92,8 @@ async function main() {
       ticketTypes: [
         { name: "General Admission", priceCents: 1200, quantityTotal: 160 },
         { name: "Door Hold", priceCents: 1500, quantityTotal: 40 }
-      ]
+      ],
+      performers: ["Static Lights", "Soft Arcade", "The Coastline"]
     },
     {
       venueId: warehouse39.id,
@@ -98,7 +104,8 @@ async function main() {
       genre: EventGenre.PUNK,
       startsAt: new Date("2026-06-20T00:00:00.000Z"),
       endsAt: new Date("2026-06-20T04:00:00.000Z"),
-      ticketTypes: [{ name: "All Ages GA", priceCents: 1000, quantityTotal: 140 }]
+      ticketTypes: [{ name: "All Ages GA", priceCents: 1000, quantityTotal: 140 }],
+      performers: ["Rust Belt Choir", "Cheap Heat", "Basement Signal"]
     },
     {
       venueId: backbarSocial.id,
@@ -109,7 +116,8 @@ async function main() {
       genre: EventGenre.COMEDY,
       startsAt: new Date("2026-06-27T01:30:00.000Z"),
       endsAt: new Date("2026-06-27T03:30:00.000Z"),
-      ticketTypes: [{ name: "General Admission", priceCents: 1500, quantityTotal: 90 }]
+      ticketTypes: [{ name: "General Admission", priceCents: 1500, quantityTotal: 90 }],
+      performers: ["Maya Torres", "Jules Park", "Late Set Laughs"]
     }
   ];
 
@@ -143,9 +151,139 @@ async function main() {
         }
       }
     });
+
+    const seededEvent = await prisma.event.findUniqueOrThrow({
+      where: {
+        slug: event.slug
+      }
+    });
+
+    for (const [index, performerName] of event.performers.entries()) {
+      const slug = performerName
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+      await prisma.eventPerformer.upsert({
+        where: {
+          eventId_slug: {
+            eventId: seededEvent.id,
+            slug
+          }
+        },
+        update: {
+          name: performerName,
+          sortOrder: index
+        },
+        create: {
+          eventId: seededEvent.id,
+          name: performerName,
+          slug,
+          sortOrder: index
+        }
+      });
+    }
   }
 
   console.log(`Seeded ${events.length} events`);
+}
+
+async function resetDemoData() {
+  const demoOrganizer = await prisma.organizer.findUnique({
+    where: {
+      slug: "localshow-demo"
+    },
+    select: {
+      id: true,
+      ownerUserId: true
+    }
+  });
+
+  if (!demoOrganizer) {
+    return;
+  }
+
+  const demoEventWhere = {
+    organizerId: demoOrganizer.id
+  };
+
+  await prisma.checkIn.deleteMany({
+    where: {
+      event: demoEventWhere
+    }
+  });
+
+  await prisma.emailNotification.deleteMany({
+    where: {
+      toEmail: {
+        endsWith: "@localshow.test"
+      }
+    }
+  });
+
+  await prisma.ticket.deleteMany({
+    where: {
+      event: demoEventWhere
+    }
+  });
+
+  await prisma.orderItem.deleteMany({
+    where: {
+      order: {
+        event: demoEventWhere
+      }
+    }
+  });
+
+  await prisma.order.deleteMany({
+    where: {
+      event: demoEventWhere
+    }
+  });
+
+  await prisma.ticketType.deleteMany({
+    where: {
+      event: demoEventWhere
+    }
+  });
+
+  await prisma.eventPerformer.deleteMany({
+    where: {
+      event: demoEventWhere
+    }
+  });
+
+  await prisma.event.deleteMany({
+    where: demoEventWhere
+  });
+
+  await prisma.venue.deleteMany({
+    where: {
+      organizerId: demoOrganizer.id
+    }
+  });
+
+  await prisma.organizer.delete({
+    where: {
+      id: demoOrganizer.id
+    }
+  });
+
+  await prisma.user.deleteMany({
+    where: {
+      OR: [
+        {
+          id: demoOrganizer.ownerUserId
+        },
+        {
+          clerkUserId: "seed_clerk_fan"
+        }
+      ]
+    }
+  });
+
+  console.log("Reset LocalShow demo data");
 }
 
 main()

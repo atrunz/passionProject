@@ -4,4 +4,8 @@ export class CheckInTicketDto {
   @IsString()
   @IsNotEmpty()
   ticketCode!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  eventId!: string;
 }

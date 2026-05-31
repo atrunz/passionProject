@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarPlus, Ticket } from "lucide-react";
 import { useApiAuthToken } from "@/components/auth-token-context";
 import { updateMe, type CurrentUser } from "@/features/users/api";
+import { DEV_ROLE_COOKIE } from "@/lib/dev-role";
 
 type OnboardingFormProps = {
   user: CurrentUser;
@@ -23,6 +24,11 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
     try {
       const authToken = await getToken();
       await updateMe({ role }, authToken);
+
+      if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+        document.cookie = `${DEV_ROLE_COOKIE}=${role}; path=/; max-age=2592000; SameSite=Lax`;
+      }
+
       router.push(role === "ORGANIZER" ? "/dashboard/account" : "/events");
       router.refresh();
     } catch (caught) {
@@ -59,7 +65,7 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
         <CalendarPlus className="size-7 text-teal-700" />
         <h2 className="mt-5 text-2xl font-black tracking-tight text-zinc-950">I run events</h2>
         <p className="mt-3 text-sm leading-6 text-zinc-600">
-          Set up an organizer profile, add venues, publish listings, and check fans in.
+          Set up an organizer profile, add locations, publish listings, and check fans in.
         </p>
         <span className="mt-6 inline-flex rounded-md bg-zinc-950 px-4 py-3 text-sm font-black text-white">
           {isSubmittingRole === "ORGANIZER" ? "Saving..." : "Continue as organizer"}
